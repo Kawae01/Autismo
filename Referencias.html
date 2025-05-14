@@ -57,6 +57,23 @@
     a:hover {
       text-decoration: underline;
     }
+
+    .back-button {
+      display: inline-block;
+      margin: 40px auto;
+      padding: 10px 20px;
+      background-color: #0c4a6e;
+      color: #ffffff;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: bold;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .back-button:hover {
+      background-color: #075985;
+    }
   </style>
 </head>
 <body>
@@ -101,9 +118,11 @@
       <!-- Continue com os demais itens da mesma forma -->
     </ul>
   </section>
-  <main>        
-    <a href="index.html">Voltar
-    </a>
-</main>
+
+  <main>
+    <div style="text-align: center;">
+      <a href="index.html" class="back-button">Voltar</a>
+    </div>
+  </main>
 </body>
 </html>
