@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Referências</title>
   <style>
     body {
@@ -14,21 +14,36 @@
     }
 
     main {
-      max-width: 800px;
+      max-width: 900px;
       margin: 40px auto;
       background: white;
-      padding: 20px;
+      padding: 30px;
       border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
 
     h1 {
       color: #0c4a6e;
-      text-align: center;
+      border-bottom: 2px solid #0c4a6e;
+      padding-bottom: 10px;
+      margin-bottom: 30px;
     }
 
-    ul {
-      list-style-type: disc;
-      padding-left: 20px;
+    .referencia {
+      margin-bottom: 25px;
+    }
+
+    .complemento {
+      background-color: #e8edf1;
+      padding: 10px 15px;
+      border-left: 5px solid #0c4a6e;
+      margin-top: 8px;
+      font-style: italic;
+    }
+
+    .voltar-container {
+      text-align: center;
+      margin-top: 40px;
     }
 
     .btn-voltar {
@@ -39,38 +54,51 @@
       text-decoration: none;
       border-radius: 8px;
       font-weight: bold;
-      margin-top: 30px;
       transition: background-color 0.3s ease;
     }
 
     .btn-voltar:hover {
       background-color: #075985;
     }
-
-    .voltar-container {
-      text-align: center;
-      margin-top: 40px;
-    }
   </style>
 </head>
 <body>
 
-  <main>
-    <h1>Referências</h1>
-    <ul>
-      <li>Lei nº 12.764/2012 – Política Nacional de Proteção dos Direitos da Pessoa com Transtorno do Espectro Autista.</li>
-      <li>Estatuto da Pessoa com Deficiência – Lei nº 13.146/2015.</li>
-      <li>Conselho Federal de Medicina – Diretrizes para diagnóstico e tratamento do TEA.</li>
-      <li>Manual Diagnóstico e Estatístico de Transtornos Mentais – DSM-5.</li>
-      <li>Instituto Nacional do Seguro Social (INSS) – Critérios do BPC/LOAS.</li>
-      <li>Sites oficiais: gov.br, senado.leg.br, planalto.gov.br.</li>
-      <li>ONGs: AMA (Associação de Amigos do Autista), APAE, Instituto Incluir.</li>
-    </ul>
+<main>
+  <h1>Referências</h1>
 
-    <div class="voltar-container">
-      <a href="index.html" class="btn-voltar">Voltar</a>
+  <div class="referencia">
+    SMITH, Tristram. Outcomes of early intervention for children with autism. <em>Pediatrics</em>, v. 145, suplemento 1, p. S35–S42, 2020.
+    <div class="complemento">
+      ABA – Análise do Comportamento Aplicada: abordagem terapêutica baseada em evidências que visa melhorar comportamentos sociais, de comunicação e aprendizagem em pessoas com Transtorno do Espectro Autista.
     </div>
-  </main>
+  </div>
+
+  <div class="referencia">
+    SILVA, Cássia de Souza e; OLIVEIRA, Juliana Ferreira de. Intervenções complementares no Transtorno do Espectro Autista: uma revisão integrativa. <em>Revista Brasileira de Terapias Cognitivas</em>, v. 17, n. 3, p. 185–193, 2021.
+    <div class="complemento">
+      TEA – Transtorno do Espectro Autista: condição do neurodesenvolvimento caracterizada por dificuldades na comunicação e interação social, além de padrões de comportamento repetitivos.
+    </div>
+  </div>
+
+  <div class="referencia">
+    BRASIL. Lei nº 12.764, de 27 de dezembro de 2012...
+    <div class="complemento">
+      SUS – Sistema Único de Saúde: sistema público de saúde brasileiro que oferece atendimento gratuito à população.
+    </div>
+  </div>
+
+  <div class="referencia">
+    SUPERIOR TRIBUNAL DE JUSTIÇA (STJ). Recurso Especial nº 1.886.929/SP, 2022...
+    <div class="complemento">
+      ANS – Agência Nacional de Saúde Suplementar: órgão regulador dos planos de saúde no Brasil.
+    </div>
+  </div>
+
+  <div class="voltar-container">
+    <a href="index.html" class="btn-voltar">Voltar</a>
+  </div>
+</main>
 
 </body>
 </html>
