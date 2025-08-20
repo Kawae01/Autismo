@@ -1,235 +1,204 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Direitos das Pessoas com Autismo</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.6;
-      margin: 0;
-      padding: 0;
-      background: #f4f4f4;
-      position: relative;
-    }
-
-    header {
-      background: #0c4a6e;
-      color: white;
-      text-align: center;
-      padding: 20px 0;
-    }
-
-    header img {
-      max-width: 400px;
-      width: 100%;
-      height: auto;
-    }
-
-    main {
-      padding: 20px;
-      max-width: 1000px;
-      margin: auto;
-      background: white;
-    }
-
-    h1, h2 {
-      color: #0c4a6e;
-    }
-
-    ul {
-      list-style-type: disc;
-      margin-left: 20px;
-    }
-
-    footer {
-      background: hsl(0, 0%, 97%);
-      color: rgb(0, 0, 0);
-      text-align: center;
-      padding: 10px 0;
-      margin-top: 30px;
-    }
-
-    .btn-referencias {
-      display: inline-block;
-      padding: 12px 24px;
-      background-color: #0c4a6e;
-      color: #ffffff;
-      text-decoration: none;
-      border-radius: 8px;
-      font-weight: bold;
-      margin-top: 40px;
-      transition: background-color 0.3s ease;
-    }
-
-    .btn-referencias:hover {
-      background-color: #075985;
-    }
-
-    .referencias-container {
-      text-align: center;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>🐍 Cobrinha Bonita</title>
+<style>
+  body {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(to bottom, #2c7a2c, #1e5f1e); /* grama com profundidade */
+    height: 100vh;
+    overflow: hidden;
+    font-family: 'Courier New', monospace;
+  }
+  canvas {
+    border: 5px solid black;
+    background: #1e5f1e;
+    display: block;
+  }
+  #menu {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.7);
+    padding: 30px;
+    border-radius: 20px;
+    color: white;
+    text-align: center;
+  }
+  #menu input, #menu select, #menu button {
+    margin: 10px 0;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 10px;
+    border: none;
+  }
+  #score {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px #000;
+  }
+</style>
 </head>
 <body>
+<div id="menu">
+  <h1>🐍 Jogo da Cobrinha</h1>
+  <input type="text" id="playerName" placeholder="Digite seu nome">
+  <br>
+  <label>Cor da Cobra: </label>
+  <select id="snakeColor">
+    <option value="green">Verde</option>
+    <option value="blue">Azul</option>
+    <option value="purple">Roxo</option>
+    <option value="orange">Laranja</option>
+    <option value="pink">Rosa</option>
+  </select>
+  <br>
+  <button onclick="startGame()">Iniciar</button>
+</div>
 
-  <!-- Fundo apagado -->
-  <div class="fundo"></div>
+<div id="score"></div>
+<canvas id="game"></canvas>
 
-  <!-- Cabeçalho -->
-  <header>
-    <img src="FOTO.jpeg" alt="Abril Azul">
-  </header>
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const scoreDisplay = document.getElementById("score");
+const menu = document.getElementById("menu");
 
-  <!-- Conteúdo principal -->
-  <main>
-    <section>
-      <h2>O que é o Autismo?</h2>
-      <p>
-        O Transtorno do Espectro Autista (TEA) é uma condição do neurodesenvolvimento que afeta a comunicação, o comportamento e a interação social. O termo “espectro” é utilizado porque os sintomas podem variar significativamente entre os indivíduos.
-      </p>
-      <p>
-        O autismo não tem cura, pois está relacionado à formação atípica do cérebro, mas tratamentos como a Análise do Comportamento Aplicada (ABA) e terapias complementares (musicoterapia, arteterapia, equoterapia) podem melhorar significativamente a qualidade de vida das pessoas com TEA.
-      </p>
-    </section>
+// Ajusta canvas para a tela
+function resizeCanvas() {
+  canvas.width = window.innerWidth - 20;
+  canvas.height = window.innerHeight - 20;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
 
-    <section>
-      <h2>Características Comuns do TEA</h2>
-      <h3>Na comunicação e interação social:</h3>
-      <ul>
-        <li>Dificuldade de iniciar ou manter conversas;</li>
-        <li>Entendimento literal da linguagem e dificuldade com ironias ou expressões faciais;</li>
-        <li>Dificuldade de adaptação a contextos sociais variados.</li>
-      </ul>
-      <h3>Comportamentos comuns:</h3>
-      <ul>
-        <li>Movimentos repetitivos e uso de linguagem própria;</li>
-        <li>Necessidade de rotinas fixas e resistência a mudanças;</li>
-        <li>Sensibilidade elevada a sons, luzes, cheiros e texturas;</li>
-        <li>Alteração na percepção de dor.</li>
-      </ul>
-    </section>
+const box = 20;
+let snake = [];
+let food;
+let score = 0;
+let d;
+let game;
+let playerName;
+let snakeColor;
 
-    <section>
-      <h2>Neurodiversidade</h2>
-      <p>
-        A neurodiversidade é um conceito que reconhece e valoriza as variações neurológicas como parte natural da diversidade humana. Ela inclui condições como autismo, TDAH, dislexia, Síndrome de Tourette e outras. O movimento de neurodiversidade luta pelos direitos, inclusão e contra a patologização dessas diferenças.
-      </p>
-    </section>
+function startGame() {
+  playerName = document.getElementById("playerName").value || "Jogador";
+  snakeColor = document.getElementById("snakeColor").value || "green";
+  menu.style.display = "none";
 
-    <section>
-      <h2>Classificação e Níveis do TEA</h2>
-      <p>
-        De acordo com o DSM-5 e o CID-10, o TEA é classificado em três níveis:
-      </p>
-      <ul>
-        <li><strong>Nível 1 (Leve):</strong> requer pouco suporte;</li>
-        <li><strong>Nível 2 (Moderado):</strong> requer suporte substancial;</li>
-        <li><strong>Nível 3 (Severo):</strong> requer apoio muito substancial.</li>
-      </ul>
-    </section>
+  snake = [];
+  snake[0] = { x: 9*box, y: 10*box };
+  score = 0;
+  d = null;
 
-    <section>
-      <h2>Direitos Legais</h2>
-      <p>
-        A Lei nº 12.764/2012 reconhece a pessoa com autismo como pessoa com deficiência, garantindo:
-      </p>
-      <ul>
-        <li>Atendimento multiprofissional gratuito no SUS ou serviços conveniados;</li>
-        <li>Uso do símbolo do quebra-cabeça para identificação de prioridade;</li>
-        <li>Inclusão no ensino regular, com adaptações curriculares;</li>
-        <li>Direito à interdição e curatela nos casos necessários para proteção civil;</li>
-        <li>Vagas de trabalho para PCDs compatíveis com suas habilidades.</li>
-      </ul>
-    </section>
+  generateFood();
+  if(game) clearInterval(game);
+  game = setInterval(draw, 100);
+}
 
-    <section>
-      <h2>Benefício de Prestação Continuada (BPC)</h2>
-      <p>
-        Pessoas com TEA têm direito ao BPC/LOAS, um salário mínimo mensal, desde que atendam aos critérios de deficiência e renda. A avaliação é feita pelo INSS, com laudos médicos e perícia social.
-      </p>
-    </section>
+// Gera comida em posição aleatória
+function generateFood() {
+  food = {
+    x: Math.floor(Math.random() * (canvas.width / box)) * box,
+    y: Math.floor(Math.random() * (canvas.height / box)) * box
+  };
+}
 
-    <section>
-      <h2>Alimentação e Nutrição</h2>
-      <p>
-        A Lei 15.131/2025 garante o direito à terapia nutricional individualizada para pessoas com TEA, considerando a seletividade alimentar, condições metabólicas específicas e possíveis déficits nutricionais.
-      </p>
-    </section>
+// Controles teclado
+document.addEventListener("keydown", function(event){
+  if (event.keyCode == 37 && d != "RIGHT") d = "LEFT";
+  else if (event.keyCode == 38 && d != "DOWN") d = "UP";
+  else if (event.keyCode == 39 && d != "LEFT") d = "RIGHT";
+  else if (event.keyCode == 40 && d != "UP") d = "DOWN";
+});
 
-    <section>
-      <h2>Isenção de Impostos na Compra de Carros</h2>
-      <p>
-        Pessoas com TEA têm direito à isenção de IPI e ICMS para aquisição de veículo adaptado ou não, desde que atendam aos critérios legais. É necessário:
-      </p>
-      <ul>
-        <li>Laudo médico com CID;</li>
-        <li>Solicitação formal aos órgãos competentes (Receita Federal e Secretaria da Fazenda);</li>
-        <li>Escolha de veículo nacional, novo, com valor limitado pela legislação.</li>
-      </ul>
-    </section>
+// Controles swipe para celular
+let startX, startY;
+document.addEventListener("touchstart", e => {
+  startX = e.touches[0].clientX;
+  startY = e.touches[0].clientY;
+});
+document.addEventListener("touchend", e => {
+  let dx = e.changedTouches[0].clientX - startX;
+  let dy = e.changedTouches[0].clientY - startY;
+  if(Math.abs(dx) > Math.abs(dy)){
+    if(dx>0 && d!="LEFT") d="RIGHT";
+    else if(dx<0 && d!="RIGHT") d="LEFT";
+  } else {
+    if(dy>0 && d!="UP") d="DOWN";
+    else if(dy<0 && d!="DOWN") d="UP";
+  }
+});
 
-    <section>
-      <h2>Proteção contra Abusos e Crimes</h2>
-      <p>O Estatuto da Pessoa com Deficiência (Lei 13.146/2015) garante proteção legal contra:</p>
-      <ul>
-        <li>Discriminação (Art. 88) – Pena de até 5 anos de prisão;</li>
-        <li>Apropriação de bens (Art. 89);</li>
-        <li>Abandono (Art. 90);</li>
-        <li>Retenção de documentos e cartões (Art. 91).</li>
-      </ul>
-    </section>
+// Função de colisão
+function collision(head,array){
+  for(let i=0;i<array.length;i++){
+    if(head.x==array[i].x && head.y==array[i].y) return true;
+  }
+  return false;
+}
 
-    <section>
-      <h2>Interdição e Curatela</h2>
-      <p>
-        A interdição visa proteger civilmente pessoas com TEA que não conseguem exercer plenamente seus atos da vida civil. Nesses casos, a curatela é designada para auxiliar em decisões jurídicas, financeiras e de saúde, garantindo o acesso aos direitos.
-      </p>
-    </section>
+// Função principal de desenho
+function draw(){
+  // Fundo
+  ctx.fillStyle="#228B22";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
 
-    <section>
-      <h2>Onde Procurar Ajuda</h2>
-      <h3>Saúde:</h3>
-      <ul>
-        <li>SUS – UBS, CAPS, NASF;</li>
-        <li>Hospitais universitários (USP, Unifesp, UFMG etc.);</li>
-        <li>Centros especializados em TEA.</li>
-      </ul>
-      <h3>Educação:</h3>
-      <ul>
-        <li>Escolas com AEE e salas de recursos;</li>
-        <li>Secretarias de Educação;</li>
-        <li>ONGs como APAE, AMA, Instituto Priorit.</li>
-      </ul>
-      <h3>Assistência Social:</h3>
-      <ul>
-        <li>CRAS, CREAS;</li>
-        <li>Solicitação do BPC/LOAS.</li>
-      </ul>
-      <h3>Direitos e Justiça:</h3>
-      <ul>
-        <li>Ministério Público, Defensoria Pública;</li>
-        <li>Disque 100;</li>
-        <li>OAB - Comissões da Pessoa com Deficiência.</li>
-      </ul>
-      <h3>Organizações de Apoio:</h3>
-      <ul>
-        <li>APAE, AMA, Instituto Incluir, Instituto Farol;</li>
-        <li>Grupos de apoio em redes sociais e comunidades locais.</li>
-      </ul>
-    </section>
+  // Cobra
+  for(let i=0;i<snake.length;i++){
+    ctx.fillStyle = (i==0)? snakeColor : "#a5f0a5";
+    ctx.beginPath();
+    ctx.arc(snake[i].x + box/2, snake[i].y + box/2, box/2, 0, Math.PI*2);
+    ctx.fill();
+  }
 
-    <div class="referencias-container">
-      <a href="Referencias.html" class="btn-referencias">Referências</a>
-    </div>
-  </main>
+  // Comida
+  ctx.fillStyle="red";
+  ctx.beginPath();
+  ctx.arc(food.x+box/2, food.y+box/2, box/2, 0, Math.PI*2);
+  ctx.fill();
 
-  <!-- Rodapé -->
-  <footer>
-    <p>&copy; 2025 Direitos Turma 1B da Prof. Maria de Lourdes – Projeto Educacional</p>
-    <img src="UMC.png" alt="Descrição da imagem" style="width: 100px; height: auto; margin-top: 10px;">
-  </footer>
+  // Posição nova da cabeça
+  let snakeX = snake[0].x;
+  let snakeY = snake[0].y;
 
+  if(d=="LEFT") snakeX -= box;
+  if(d=="UP") snakeY -= box;
+  if(d=="RIGHT") snakeX += box;
+  if(d=="DOWN") snakeY += box;
+
+  // Comeu comida
+  if(snakeX == food.x && snakeY == food.y){
+    score++;
+    generateFood();
+  } else {
+    snake.pop();
+  }
+
+  let newHead = {x:snakeX, y:snakeY};
+
+  // Colisão
+  if(snakeX < 0 || snakeY < 0 || snakeX >= canvas.width || snakeY >= canvas.height || collision(newHead,snake)){
+    clearInterval(game);
+    alert(`💀 Game Over, ${playerName}! Pontuação: ${score}`);
+    menu.style.display="block";
+  }
+
+  snake.unshift(newHead);
+
+  // Placar
+  scoreDisplay.innerText = `${playerName} | Score: ${score}`;
+}
+</script>
 </body>
 </html>
