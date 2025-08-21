@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <title>🐍 Cobrinha Bonita</title>
+
+<!-- Código do AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6184395720701313"
+     crossorigin="anonymous"></script>
+
 <style>
   body {
     margin: 0;
@@ -10,26 +15,31 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(to bottom, #2c7a2c, #1e5f1e); /* grama com profundidade */
+    background: linear-gradient(to bottom, #2c7a2c, #1e5f1e);
     height: 100vh;
     overflow: hidden;
     font-family: 'Courier New', monospace;
   }
+
   canvas {
     border: 5px solid black;
     background: #1e5f1e;
     display: block;
   }
+
   #menu {
     position: absolute;
     top: 50%;
-    transform: translateY(-50%);
+    left: 50%;
+    transform: translate(-50%, -50%);
     background: rgba(0,0,0,0.7);
     padding: 30px;
     border-radius: 20px;
     color: white;
     text-align: center;
+    z-index: 2;
   }
+
   #menu input, #menu select, #menu button {
     margin: 10px 0;
     padding: 10px;
@@ -37,6 +47,7 @@
     border-radius: 10px;
     border: none;
   }
+
   #score {
     position: absolute;
     top: 10px;
@@ -45,10 +56,12 @@
     font-size: 22px;
     font-weight: bold;
     text-shadow: 2px 2px 4px #000;
+    z-index: 2;
   }
 </style>
 </head>
 <body>
+
 <div id="menu">
   <h1>🐍 Jogo da Cobrinha</h1>
   <input type="text" id="playerName" placeholder="Digite seu nome">
@@ -76,8 +89,8 @@ const menu = document.getElementById("menu");
 
 // Ajusta canvas para a tela
 function resizeCanvas() {
-  canvas.width = window.innerWidth - 20;
-  canvas.height = window.innerHeight - 20;
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 }
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
@@ -202,11 +215,3 @@ function draw(){
 </script>
 </body>
 </html>
-<head>
-  <meta charset="UTF-8">
-  <title>Meu Site</title>
-  
-  <!-- Código do AdSense -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=SEU-CODIGO"
-     crossorigin="anonymous"></script>
-</head>
