@@ -3,41 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <title>🐍 Cobrinha Bonita</title>
-
-<!-- Código do AdSense -->
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6184395720701313"
-     crossorigin="anonymous"></script>
-
 <style>
   body {
     margin: 0;
     display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
-    background: linear-gradient(to bottom, #2c7a2c, #1e5f1e);
+    align-items: center;
+    background: #0f3d0f; /* verde escuro ao redor */
     height: 100vh;
     overflow: hidden;
     font-family: 'Courier New', monospace;
   }
 
   canvas {
-    border: 5px solid black;
-    background: #1e5f1e;
+    border: 15px solid black; /* borda preta */
+    background: #1e5f1e; /* verde do campo */
     display: block;
+    box-shadow: 0 0 20px #000; /* sombra */
   }
 
-  #menu {
+  #menu, #gameOver {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(0,0,0,0.7);
+    background: rgba(0,0,0,0.8);
     padding: 30px;
     border-radius: 20px;
     color: white;
     text-align: center;
     z-index: 2;
+    display: none;
+  }
+
+  #menu.active, #gameOver.active {
+    display: block;
   }
 
   #menu input, #menu select, #menu button {
@@ -51,18 +51,26 @@
   #score {
     position: absolute;
     top: 10px;
-    left: 10px;
+    left: 50%;
+    transform: translateX(-50%);
     color: white;
     font-size: 22px;
     font-weight: bold;
     text-shadow: 2px 2px 4px #000;
     z-index: 2;
   }
+
+  #ranking {
+    margin-top: 15px;
+    text-align: left;
+    font-size: 14px;
+  }
 </style>
 </head>
 <body>
 
-<div id="menu">
+<!-- Menu inicial -->
+<div id="menu" class="active">
   <h1>🐍 Jogo da Cobrinha</h1>
   <input type="text" id="playerName" placeholder="Digite seu nome">
   <br>
@@ -75,10 +83,32 @@
     <option value="pink">Rosa</option>
   </select>
   <br>
+  <label>Dificuldade: </label>
+  <select id="difficulty">
+    <option value="150">Fácil</option>
+    <option value="100" selected>Médio</option>
+    <option value="70">Difícil</option>
+  </select>
+  <br>
   <button onclick="startGame()">Iniciar</button>
+
+  <div id="ranking">
+    <h3>🏆 Ranking</h3>
+    <ol id="rankingList"></ol>
+  </div>
 </div>
 
+<!-- Tela de Game Over -->
+<div id="gameOver">
+  <h2 id="gameOverText"></h2>
+  <button onclick="restartGame()">Jogar Novamente</button>
+  <button onclick="backToMenu()">Voltar ao Menu</button>
+</div>
+
+<!-- Placar -->
 <div id="score"></div>
+
+<!-- Jogo -->
 <canvas id="game"></canvas>
 
 <script>
@@ -86,44 +116,53 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 const scoreDisplay = document.getElementById("score");
 const menu = document.getElementById("menu");
+const gameOverScreen = document.getElementById("gameOver");
+const gameOverText = document.getElementById("gameOverText");
+const rankingList = document.getElementById("rankingList");
 
-// Ajusta canvas para a tela
 function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  // deixa o canvas menor para aparecer borda ao redor
+  canvas.width = window.innerWidth * 0.9;
+  canvas.height = window.innerHeight * 0.9;
 }
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
-const box = 20;
+let box = 20;
 let snake = [];
 let food;
 let score = 0;
 let d;
-let game;
 let playerName;
 let snakeColor;
+let speed;
+let lastRender = 0;
+let gameRunning = false;
 
 function startGame() {
   playerName = document.getElementById("playerName").value || "Jogador";
   snakeColor = document.getElementById("snakeColor").value || "green";
-  menu.style.display = "none";
+  speed = parseInt(document.getElementById("difficulty").value);
 
-  snake = [];
-  snake[0] = { x: 9*box, y: 10*box };
+  menu.classList.remove("active");
+  gameOverScreen.classList.remove("active");
+  gameRunning = true;
+
+  snake = [{ x: 9*box, y: 10*box }];
   score = 0;
   d = null;
 
   generateFood();
-  if(game) clearInterval(game);
-  game = setInterval(draw, 100);
+  requestAnimationFrame(gameLoop);
 }
 
-// Gera comida em posição aleatória
+// Gera comida alinhada no grid
 function generateFood() {
+  let cols = Math.floor(canvas.width / box);
+  let rows = Math.floor(canvas.height / box);
   food = {
-    x: Math.floor(Math.random() * (canvas.width / box)) * box,
-    y: Math.floor(Math.random() * (canvas.height / box)) * box
+    x: Math.floor(Math.random() * cols) * box,
+    y: Math.floor(Math.random() * rows) * box
   };
 }
 
@@ -135,7 +174,7 @@ document.addEventListener("keydown", function(event){
   else if (event.keyCode == 40 && d != "UP") d = "DOWN";
 });
 
-// Controles swipe para celular
+// Swipe mobile
 let startX, startY;
 document.addEventListener("touchstart", e => {
   startX = e.touches[0].clientX;
@@ -153,7 +192,7 @@ document.addEventListener("touchend", e => {
   }
 });
 
-// Função de colisão
+// Colisão
 function collision(head,array){
   for(let i=0;i<array.length;i++){
     if(head.x==array[i].x && head.y==array[i].y) return true;
@@ -161,27 +200,20 @@ function collision(head,array){
   return false;
 }
 
-// Função principal de desenho
-function draw(){
-  // Fundo
-  ctx.fillStyle="#228B22";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
+// Loop do jogo
+function gameLoop(timestamp) {
+  if (!gameRunning) return;
 
-  // Cobra
-  for(let i=0;i<snake.length;i++){
-    ctx.fillStyle = (i==0)? snakeColor : "#a5f0a5";
-    ctx.beginPath();
-    ctx.arc(snake[i].x + box/2, snake[i].y + box/2, box/2, 0, Math.PI*2);
-    ctx.fill();
+  if (timestamp - lastRender > speed) {
+    update();
+    render();
+    lastRender = timestamp;
   }
 
-  // Comida
-  ctx.fillStyle="red";
-  ctx.beginPath();
-  ctx.arc(food.x+box/2, food.y+box/2, box/2, 0, Math.PI*2);
-  ctx.fill();
+  requestAnimationFrame(gameLoop);
+}
 
-  // Posição nova da cabeça
+function update() {
   let snakeX = snake[0].x;
   let snakeY = snake[0].y;
 
@@ -190,7 +222,6 @@ function draw(){
   if(d=="RIGHT") snakeX += box;
   if(d=="DOWN") snakeY += box;
 
-  // Comeu comida
   if(snakeX == food.x && snakeY == food.y){
     score++;
     generateFood();
@@ -200,18 +231,69 @@ function draw(){
 
   let newHead = {x:snakeX, y:snakeY};
 
-  // Colisão
   if(snakeX < 0 || snakeY < 0 || snakeX >= canvas.width || snakeY >= canvas.height || collision(newHead,snake)){
-    clearInterval(game);
-    alert(`💀 Game Over, ${playerName}! Pontuação: ${score}`);
-    menu.style.display="block";
+    gameOver();
+    return;
   }
 
   snake.unshift(newHead);
+}
 
-  // Placar
+function render() {
+  ctx.fillStyle="#1e5f1e";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  for(let i=0;i<snake.length;i++){
+    ctx.fillStyle = (i==0)? snakeColor : "#a5f0a5";
+    ctx.beginPath();
+    ctx.arc(snake[i].x + box/2, snake[i].y + box/2, box/2, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  ctx.fillStyle="red";
+  ctx.beginPath();
+  ctx.arc(food.x+box/2, food.y+box/2, box/2, 0, Math.PI*2);
+  ctx.fill();
+
   scoreDisplay.innerText = `${playerName} | Score: ${score}`;
 }
+
+function gameOver() {
+  gameRunning = false;
+  saveScore(playerName, score);
+  gameOverText.innerText = `💀 Game Over, ${playerName}! Pontuação: ${score}`;
+  gameOverScreen.classList.add("active");
+  updateRanking();
+}
+
+function restartGame() {
+  startGame();
+}
+
+function backToMenu() {
+  gameOverScreen.classList.remove("active");
+  menu.classList.add("active");
+}
+
+// Ranking (localStorage)
+function saveScore(name, score) {
+  let ranking = JSON.parse(localStorage.getItem("ranking")) || [];
+  ranking.push({name, score});
+  ranking.sort((a,b) => b.score - a.score);
+  ranking = ranking.slice(0,5);
+  localStorage.setItem("ranking", JSON.stringify(ranking));
+}
+
+function updateRanking() {
+  let ranking = JSON.parse(localStorage.getItem("ranking")) || [];
+  rankingList.innerHTML = "";
+  ranking.forEach(r => {
+    let li = document.createElement("li");
+    li.textContent = `${r.name} - ${r.score}`;
+    rankingList.appendChild(li);
+  });
+}
+updateRanking();
 </script>
 </body>
 </html>
