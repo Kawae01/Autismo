@@ -2,8 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>🐍 Snake Deluxe</title>
-
+<title>🐍 Cobrinha Jogo</title>
 <style>
   body {
     margin: 0;
@@ -58,7 +57,7 @@
 <body>
 
 <div id="menu">
-  <h1>🐍 Snake Deluxe</h1>
+  <h1>🐍 Cobrinha Jogo</h1>
   <input type="text" id="playerName" placeholder="Digite seu nome"><br>
 
   <label>Cor da Cobra: </label>
@@ -89,7 +88,6 @@ const ctx = canvas.getContext("2d");
 const scoreDisplay = document.getElementById("score");
 const menu = document.getElementById("menu");
 
-// Ajusta tamanho do canvas
 function resizeCanvas() {
   canvas.width = window.innerWidth - 20;
   canvas.height = window.innerHeight - 20;
@@ -114,14 +112,13 @@ function startGame() {
   mode = document.getElementById("gameMode").value;
   menu.style.display = "none";
 
-  snake = [];
-  snake[0] = { x: 10*box, y: 10*box };
+  snake = [{x: 10*box, y: 10*box}];
   score = 0;
   d = null;
   obstacles = [];
 
   generateFood();
-  if (mode === "hardcore") generateObstacles();
+  if(mode === "hardcore") generateObstacles();
 
   if(game) clearInterval(game);
   game = setInterval(draw, mode === "hardcore" ? 80 : 100);
@@ -135,25 +132,25 @@ function generateFood() {
   };
 }
 
-// Gera obstáculos no modo hardcore
+// Obstáculos hardcore
 function generateObstacles() {
   obstacles = [];
-  for (let i = 0; i < 10; i++) {
+  for (let i=0;i<10;i++){
     obstacles.push({
-      x: Math.floor(Math.random() * (canvas.width / box)) * box,
-      y: Math.floor(Math.random() * (canvas.height / box)) * box
+      x: Math.floor(Math.random()*(canvas.width/box))*box,
+      y: Math.floor(Math.random()*(canvas.height/box))*box
     });
   }
 }
 
 // Controles teclado
 document.addEventListener("keydown", function(event){
-  if (event.keyCode == 37 && d != "RIGHT") d = "LEFT";
-  else if (event.keyCode == 38 && d != "DOWN") d = "UP";
-  else if (event.keyCode == 39 && d != "LEFT") d = "RIGHT";
-  else if (event.keyCode == 40 && d != "UP") d = "DOWN";
-  else if (event.keyCode == 80) pauseGame(); // P = pausa
-  else if (event.keyCode == 82) restartGame(); // R = reinício
+  if(event.keyCode==37 && d!="RIGHT") d="LEFT";
+  else if(event.keyCode==38 && d!="DOWN") d="UP";
+  else if(event.keyCode==39 && d!="LEFT") d="RIGHT";
+  else if(event.keyCode==40 && d!="UP") d="DOWN";
+  else if(event.keyCode==80) paused=!paused; // P
+  else if(event.keyCode==82) restartGame();   // R
 });
 
 // Controles swipe para celular
@@ -176,11 +173,6 @@ document.addEventListener("touchend", e => {
 
 // Pausa
 let paused = false;
-function pauseGame() {
-  paused = !paused;
-}
-
-// Reinício rápido
 function restartGame() {
   clearInterval(game);
   menu.style.display = "block";
@@ -194,82 +186,109 @@ function collision(head,array){
   return false;
 }
 
-// Principal
+// Loop principal
 function draw(){
-  if (paused) return;
+  if(paused) return;
 
   // Fundo quadriculado
-  for (let x = 0; x < canvas.width; x += box) {
-    for (let y = 0; y < canvas.height; y += box) {
-      ctx.fillStyle = ((x/box + y/box) % 2 == 0) ? "#267326" : "#2e8b2e";
+  for(let x=0;x<canvas.width;x+=box){
+    for(let y=0;y<canvas.height;y+=box){
+      ctx.fillStyle=((x/box + y/box)%2==0)?"#267326":"#2e8b2e";
       ctx.fillRect(x,y,box,box);
     }
   }
 
-  // Obstáculos (modo hardcore)
-  if (mode === "hardcore") {
+  // Obstáculos hardcore
+  if(mode==="hardcore"){
     ctx.fillStyle="brown";
-    for (let i=0; i<obstacles.length; i++){
-      ctx.fillRect(obstacles[i].x, obstacles[i].y, box, box);
-    }
+    obstacles.forEach(o => ctx.fillRect(o.x,o.y,box,box));
   }
 
-  // Cobra
-  for(let i=0;i<snake.length;i++){
-    ctx.fillStyle = (i==0)? snakeColor : "#a5f0a5";
+  // Cobra 
+ctx.lineWidth = box;
+ctx.lineCap = 'round';
+ctx.strokeStyle = snakeColor;
+
+if(snake.length > 1){
     ctx.beginPath();
-    ctx.arc(snake[i].x + box/2, snake[i].y + box/2, box/2, 0, Math.PI*2);
+    ctx.moveTo(snake[0].x + box/2, snake[0].y + box/2);
+    for(let i=1;i<snake.length;i++){
+        ctx.lineTo(snake[i].x + box/2, snake[i].y + box/2);
+    }
+    ctx.stroke();
+} else {
+    // Apenas a cabeça, desenha círculo
+    ctx.fillStyle = snakeColor;
+    ctx.beginPath();
+    ctx.arc(snake[0].x + box/2, snake[0].y + box/2, box/2, 0, Math.PI*2);
     ctx.fill();
-  }
+}
 
-  // Comida
-  ctx.fillStyle="red";
-  ctx.beginPath();
-  ctx.arc(food.x+box/2, food.y+box/2, box/2, 0, Math.PI*2);
-  ctx.fill();
+// Comida estilo maçã
+let fx = food.x + box/2;
+let fy = food.y + box/2;
 
-  // Cabeça
+// Corpo da maçã
+ctx.fillStyle = "red";
+ctx.beginPath();
+ctx.arc(fx, fy, box/2, 0, Math.PI * 2);
+ctx.fill();
+
+// Folha
+ctx.fillStyle = "green";
+ctx.beginPath();
+ctx.moveTo(fx, fy - box/2);
+ctx.lineTo(fx - box/6, fy - box*0.7);
+ctx.lineTo(fx + box/6, fy - box*0.7);
+ctx.closePath();
+ctx.fill();
+
+// Cabinho
+ctx.strokeStyle = "#8B4513"; // marrom
+ctx.lineWidth = 2;
+ctx.beginPath();
+ctx.moveTo(fx, fy - box/2);
+ctx.lineTo(fx, fy - box*0.8);
+ctx.stroke();
+
+
+  // Nova posição da cabeça
   let snakeX = snake[0].x;
   let snakeY = snake[0].y;
-
-  if(d=="LEFT") snakeX -= box;
-  if(d=="UP") snakeY -= box;
-  if(d=="RIGHT") snakeX += box;
-  if(d=="DOWN") snakeY += box;
+  if(d=="LEFT") snakeX-=box;
+  if(d=="UP") snakeY-=box;
+  if(d=="RIGHT") snakeX+=box;
+  if(d=="DOWN") snakeY+=box;
 
   // Modos de jogo
-  if (mode === "infinite") {
-    if (snakeX < 0) snakeX = canvas.width - box;
-    if (snakeY < 0) snakeY = canvas.height - box;
-    if (snakeX >= canvas.width) snakeX = 0;
-    if (snakeY >= canvas.height) snakeY = 0;
+  if(mode==="infinite"){
+    if(snakeX<0) snakeX=canvas.width-box;
+    if(snakeY<0) snakeY=canvas.height-box;
+    if(snakeX>=canvas.width) snakeX=0;
+    if(snakeY>=canvas.height) snakeY=0;
   }
 
-  // Comeu comida
-  if(snakeX == food.x && snakeY == food.y){
+  // Comer comida
+  if(snakeX==food.x && snakeY==food.y){
     score++;
     generateFood();
   } else {
     snake.pop();
   }
 
-  let newHead = {x:snakeX, y:snakeY};
+  let newHead={x:snakeX,y:snakeY};
 
-  // Colisões (clássico/hardcore)
-  if (mode !== "infinite") {
-    if(snakeX < 0 || snakeY < 0 || snakeX >= canvas.width || snakeY >= canvas.height){
-      return gameOver();
-    }
+  // Colisões
+  if(mode!=="infinite"){
+    if(snakeX<0 || snakeY<0 || snakeX>=canvas.width || snakeY>=canvas.height) return gameOver();
   }
-
-  if (collision(newHead, snake)) return gameOver();
-
-  if (mode === "hardcore" && collision(newHead, obstacles)) return gameOver();
+  if(collision(newHead,snake)) return gameOver();
+  if(mode==="hardcore" && collision(newHead,obstacles)) return gameOver();
 
   snake.unshift(newHead);
 
   // Placar
-  scoreDisplay.innerText = `${playerName} | Modo: ${mode} | Score: ${score}`;
+  scoreDisplay.innerText=`${playerName} | Modo: ${mode} | Score: ${score}`;
 }
 
 // Game Over
