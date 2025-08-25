@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>UBC — Chat IA</title>
+    <style>
+        :root{
+            --bg:#f3f5f8;
+            --sidebar:#eef2f6;
+            --accent:#6b5dd2;
+            --muted:#cfd7df;
+            --bubble-ia:#f0f3f6;
+            --bubble-user:#dfe9fb;
+            --text:#334;
+        }
+        *{box-sizing:border-box}
+        body{
+            margin:0;
+            font-family: "Inter", Arial, sans-serif;
+            background:var(--bg);
+            color:var(--text);
+        }
+
+        /* Layout */
+        .app{
+            display:flex;
+            height:100vh;
+            gap:20px;
+            padding:20px;
+        }
+        .sidebar{
+            width:220px;
+            background:var(--sidebar);
+            border-radius:12px;
+            padding:18px;
+            box-shadow:0 6px 18px rgba(20,30,60,0.06);
+        }
+        .logo{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            margin-bottom:18px;
+        }
+        .logo .circle{
+            width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;
+        }
+        .menu{margin-top:8px}
+        .menu button{
+            width:100%;
+            display:flex;
+            gap:10px;
+            align-items:center;
+            padding:10px 12px;
+            border-radius:8px;
+            background:transparent;
+            border:none;
+            text-align:left;
+            color:#334;
+            cursor:pointer;
+            margin-bottom:8px;
+        }
+        .menu button.active{ background:var(--accent); color:white; box-shadow:0 6px 14px rgba(107,93,210,0.12); }
+
+        /* Main area */
+        .main{
+            flex:1;
+            display:flex;
+            flex-direction:column;
+            gap:14px;
+        }
+        .header{
+            height:64px;
+            background:transparent;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            padding:0 6px;
+        }
+        .header h1{ font-size:20px; margin:0; font-weight:600; color: #586174; }
+        .header .right-logo{
+            width:44px;height:44px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;
+        }
+
+        /* Chat panel */
+        .chat-panel{
+            background:#fff;
+            border-radius:14px;
+            padding:22px;
+            box-shadow:0 10px 30px rgba(20,30,60,0.06);
+            display:flex;
+            flex-direction:column;
+            gap:12px;
+            height: calc(100vh - 140px);
+            overflow:hidden;
+        }
+        .messages{
+            flex:1;
+            overflow:auto;
+            padding:8px 12px;
+        }
+
+        /* Message row */
+        .row{
+            display:flex;
+            gap:12px;
+            align-items:flex-start;
+            margin-bottom:18px;
+        }
+        .row.ia{ justify-content:flex-start; }
+        .row.user{ justify-content:flex-end; }
+
+        .avatar{
+            width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:white;background:var(--accent);flex-shrink:0;
+        }
+        .avatar.user{ background:#6a93ff; }
+
+        .bubble{
+            max-width:72%;
+            padding:14px 18px;
+            border-radius:14px;
+            position:relative;
+            line-height:1.4;
+            box-shadow:0 6px 18px rgba(20,30,60,0.04);
+        }
+        .row.ia .bubble{
+            background:var(--bubble-ia);
+            border-radius:14px 14px 14px 6px;
+        }
+        .row.user .bubble{
+            background:var(--bubble-user);
+            border-radius:14px 14px 6px 14px;
+        }
+        .msg-meta{
+            font-size:12px;color:#6b7280;margin-bottom:6px;
+        }
+
+        /* Input area */
+        .composer{
+            display:flex;
+            gap:12px;
+            align-items:center;
+            padding-top:6px;
+        }
+        .composer input{
+            flex:1;
+            padding:14px 18px;
+            border-radius:28px;
+            border:1px solid var(--muted);
+            background:transparent;
+            outline:none;
+            font-size:14px;
+        }
+        .composer button{
+            background:var(--accent);
+            color:white;
+            border:none;
+            padding:10px 16px;
+            border-radius:20px;
+            cursor:pointer;
+        }
+
+        /* small screens */
+        @media(max-width:800px){
+            .sidebar{ display:none; }
+            .chat-panel{ height: calc(100vh - 100px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="circle">UBC</div>
+                <div>
+                    <div style="font-weight:700;color:#334;">UBC</div>
+                    <div style="font-size:12px;color:#7b8596;">Chat IA</div>
+                </div>
+            </div>
+
+            <nav class="menu">
+                <button class="active">💬 Chat IA</button>
+                <button>🕘 Histórico</button>
+                <button>⚙️ Configurações</button>
+            </nav>
+        </aside>
+
+        <main class="main">
+            <header class="header">
+                <h1>Chat IA</h1>
+                <div class="right-logo">UBC</div>
+            </header>
+
+            <section class="chat-panel" aria-label="Conversa">
+                <div class="messages" id="messages">
+                    <div class="row ia">
+                        <div class="avatar">IA</div>
+                        <div class="bubble">
+                            <div class="msg-meta"></div>
+                            Olá! Eu sou a DUDA, um grande modelo de linguagem. Como posso ajudar você hoje?
+                        </div>
+                    </div>
+
+                    <div class="row user">
+                        <div class="bubble">
+                            <div class="msg-meta" style="text-align:right;"></div>
+                            Quais são os benefícios de usar energia solar?
+                        </div>
+                        <div class="avatar user">U</div>
+                    </div>
+
+                    <div class="row ia">
+                        <div class="avatar">IA</div>
+                        <div class="bubble">
+                            A energia solar oferece diversos benefícios, incluindo a redução da conta de luz, a diminuição da poluição ambiental e a valorização do imóvel. É uma fonte de energia renovável e sustentável.
+                        </div>
+                    </div>
+
+                    <div class="row ia">
+                        <div class="avatar">IA</div>
+                        <div class="bubble">
+                            Posso te dar mais detalhes sobre a instalação ou o impacto econômico, se desejar.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="composer">
+                    <input id="input" placeholder="Escreva sua mensagem..." />
+                    <button id="send">Enviar</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // pequeno script para simular envio (substitua/integre conforme desejar)
+        const input = document.getElementById('input');
+        const send = document.getElementById('send');
+        const messages = document.getElementById('messages');
+
+        send.addEventListener('click', () => {
+            const text = input.value.trim();
+            if(!text) return;
+            const row = document.createElement('div');
+            row.className = 'row user';
+            row.innerHTML = `
+                <div class="bubble"><div class="msg-meta" style="text-align:right;"><strong>U</strong></div>${escapeHtml(text)}</div>
+                <div class="avatar user">U</div>
+            `;
+            messages.appendChild(row);
+            input.value = '';
+            messages.scrollTop = messages.scrollHeight;
+            // exemplo de resposta automático
+            setTimeout(()=> {
+                const r = document.createElement('div');
+                r.className = 'row ia';
+                r.innerHTML = `<div class="avatar">IA</div>
+                    <div class="bubble">Recebi sua pergunta: "${escapeHtml(text)}". Posso detalhar mais se quiser.</div>`;
+                messages.appendChild(r);
+                messages.scrollTop = messages.scrollHeight;
+            },700);
+        });
+
+        function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    </script>
+</body>
+</html>
