@@ -80,6 +80,28 @@ canvas {
     <option value="infinito">Infinito</option>
     <option value="hardcore">Hardcore</option>
   </select><br>
+  <script>
+  const select = document.getElementById("snakeColor");
+
+  function updateColor() {
+    let color = select.value;
+
+    if (color === "rainbow") {
+      // deixa o select com efeito arco-íris
+      select.style.background = "linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet)";
+      select.style.color = "white";
+    } else {
+      // cores normais
+      select.style.background = color;
+      select.style.color = (color === "yellow" || color === "pink" || color === "orange")
+        ? "black"
+        : "white";
+    }
+  }
+
+  select.addEventListener("change", updateColor);
+  updateColor();
+</script>
 
   <button onclick="startGame()">Iniciar</button>
 </div>
