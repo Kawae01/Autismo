@@ -1,42 +1,33 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>🐍 Cobrinha Jogo</title>
-
-<style>
 html, body {
   margin: 0;
   padding: 0;
   overflow: hidden;
+  overflow: hidden; /* Bloqueia scroll no mobile */
   height: 100%;
   touch-action: none;
+  touch-action: none; /* Bloqueia gestos de zoom e scroll */
 }
 body {
   display: flex;
-  justify-content: center;
-  align-items: center;
+@@ -18,11 +18,13 @@
   font-family: 'Courier New', monospace;
   background: linear-gradient(to bottom, #1a3d1a, #0e220e);
 }
+
 canvas {
   border: 10px solid #0d260d;
   background: #1e5f1e;
   display: block;
 }
+
 #menu {
   position: absolute;
   top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(0,0,0,0.85);
-  padding: 30px;
-  border-radius: 20px;
-  color: white;
+@@ -35,13 +37,15 @@
   text-align: center;
   z-index: 10;
 }
+
 #menu input, #menu select, #menu button {
   margin: 8px 0;
   padding: 10px;
@@ -44,37 +35,24 @@ canvas {
   border-radius: 10px;
   border: none;
 }
+
 #score {
   position: absolute;
   top: 10px;
-  left: 10px;
-  color: white;
-  font-size: 22px;
-  font-weight: bold;
-  text-shadow: 2px 2px 4px #000;
-  z-index: 5;
-}
-</style>
-</head>
-
-<body>
-
+@@ -59,6 +63,7 @@
 <div id="menu">
   <h1>🐍 Cobrinha Jogo</h1>
-
   <input type="text" id="playerName" placeholder="Digite seu nome"><br>
 
-  <label>Cor da Cobra:</label>
+  <label>Cor da Cobra: </label>
   <select id="snakeColor">
     <option value="yellow">Amarelo</option>
-    <option value="blue">Azul</option>
-    <option value="purple">Roxo</option>
+@@ -67,12 +72,14 @@ <h1>🐍 Cobrinha Jogo</h1>
     <option value="orange">Laranja</option>
     <option value="pink">Rosa</option>
-    <option value="rainbow">Rainbow</option>
   </select><br>
 
-  <label>Modo de Jogo:</label>
+  <label>Modo de Jogo: </label>
   <select id="gameMode">
     <option value="classico">Clássico</option>
     <option value="infinito">Infinito</option>
@@ -84,220 +62,181 @@ canvas {
   <button onclick="startGame()">Iniciar</button>
 </div>
 
-<div id="score"></div>
-<canvas id="game"></canvas>
-
-<script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-const menu = document.getElementById("menu");
-const scoreDisplay = document.getElementById("score");
-
-let box = 20;
-let snake = [];
+@@ -90,25 +97,22 @@ <h1>🐍 Cobrinha Jogo</h1>
 let food;
 let obstacles = [];
 let score = 0;
-let d = "RIGHT";
+let d = null;
+let d;
 let game;
 let playerName;
-let snakeColor = "yellow";
+let snakeColor;
 let mode;
 let particles = [];
 let paused = false;
-let rainbowHue = 0;
+let touchX = null;
+let touchY = null;
 
-/* ===== CANVAS ===== */
+// Ajusta canvas
 function resizeCanvas(){
-  canvas.width = Math.floor(window.innerWidth / box) * box;
-  canvas.height = Math.floor(window.innerHeight / box) * box;
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 }
 resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
+window.addEventListener('resize', resizeCanvas);
 
-/* ===== START ===== */
+// INICIO DO JOGO
+// INÍCIO DO JOGO
 function startGame(){
   playerName = document.getElementById("playerName").value || "Jogador";
-  snakeColor = document.getElementById("snakeColor")?.value || "yellow";
-  mode = document.getElementById("gameMode").value;
+  snakeColor = document.getElementById("snakeColor").value || "green";
+@@ -117,10 +121,9 @@ <h1>🐍 Cobrinha Jogo</h1>
 
-  menu.style.display = "none";
-
-  snake = [{ x: 10 * box, y: 10 * box }];
+  snake = [{x:10*box, y:10*box}];
   score = 0;
-  d = "RIGHT";
-  particles = [];
+  d = null;
   obstacles = [];
+  particles = [];
+  touchX = null;
+  touchY = null;
 
   generateFood();
-  if(mode === "hardcore") generateObstacles();
-
-  clearInterval(game);
-  game = setInterval(draw, mode === "hardcore" ? 80 : 100);
+  if(mode==="hardcore") generateObstacles();
+@@ -129,7 +132,7 @@ <h1>🐍 Cobrinha Jogo</h1>
+  game = setInterval(draw, mode==="hardcore"?80:100);
 }
 
-/* ===== FOOD ===== */
+// GERA COMIDA
+// GERA COMIDA SEM COLIDIR COM COBRA OU OBSTÁCULOS
 function generateFood(){
   let valid = false;
   while(!valid){
-    food = {
-      x: Math.floor(Math.random() * (canvas.width / box)) * box,
-      y: Math.floor(Math.random() * (canvas.height / box)) * box
-    };
-    valid = !collision(food, snake) && !collision(food, obstacles);
+@@ -141,7 +144,7 @@ <h1>🐍 Cobrinha Jogo</h1>
   }
 }
 
-/* ===== OBSTACLES ===== */
+// GERA OBSTÁCULOS
+// GERA OBSTÁCULOS HARDCORE
 function generateObstacles(){
-  for(let i = 0; i < 10; i++){
-    obstacles.push({
-      x: Math.floor(Math.random() * (canvas.width / box)) * box,
-      y: Math.floor(Math.random() * (canvas.height / box)) * box
-    });
-  }
-}
+  obstacles=[];
+  for(let i=0;i<10;i++){
+@@ -159,25 +162,37 @@ <h1>🐍 Cobrinha Jogo</h1>
 
-/* ===== KEYBOARD ===== */
-document.addEventListener("keydown", e => {
-  if(e.key === "ArrowLeft" && d !== "RIGHT") d = "LEFT";
-  if(e.key === "ArrowUp" && d !== "DOWN") d = "UP";
-  if(e.key === "ArrowRight" && d !== "LEFT") d = "RIGHT";
-  if(e.key === "ArrowDown" && d !== "UP") d = "DOWN";
-  if(e.key === "p") paused = !paused;
+// EVENTOS TECLADO
+document.addEventListener("keydown", e=>{
+  if(e.key=="ArrowLeft") d="LEFT";
+  else if(e.key=="ArrowUp") d="UP";
+  else if(e.key=="ArrowRight") d="RIGHT";
+  else if(e.key=="ArrowDown") d="DOWN";
+  if(e.key=="ArrowLeft" && d!="RIGHT") d="LEFT";
+  else if(e.key=="ArrowUp" && d!="DOWN") d="UP";
+  else if(e.key=="ArrowRight" && d!="LEFT") d="RIGHT";
+  else if(e.key=="ArrowDown" && d!="UP") d="DOWN";
+  else if(e.key=="p") paused=!paused;
+  else if(e.key=="r") restartGame();
 });
 
-/* ===== TOUCH ===== */
+// EVENTOS TOUCH (MOVIMENTO)
+// EVENTOS TOUCH (SWIPE)
 let startX, startY;
-canvas.addEventListener("touchstart", e => {
-  startX = e.touches[0].clientX;
-  startY = e.touches[0].clientY;
-}, { passive: false });
+canvas.addEventListener("touchstart", e=>{
+  e.preventDefault();
+  touchX = e.touches[0].clientX;
+  touchY = e.touches[0].clientY;
+  startX=e.touches[0].clientX;
+  startY=e.touches[0].clientY;
+},{passive:false});
 
-canvas.addEventListener("touchend", e => {
+canvas.addEventListener("touchmove", e=>{
+  e.preventDefault();
+  touchX = e.touches[0].clientX;
+  touchY = e.touches[0].clientY;
+},{passive:false});
+
+canvas.addEventListener("touchend", e=>{
+  e.preventDefault();
   let dx = e.changedTouches[0].clientX - startX;
   let dy = e.changedTouches[0].clientY - startY;
-
-  if(Math.abs(dx) > Math.abs(dy)){
-    if(dx > 0 && d !== "LEFT") d = "RIGHT";
-    if(dx < 0 && d !== "RIGHT") d = "LEFT";
+  if(Math.abs(dx)>Math.abs(dy)){
+    if(dx>0 && d!="LEFT") d="RIGHT";
+    else if(dx<0 && d!="RIGHT") d="LEFT";
   } else {
-    if(dy > 0 && d !== "UP") d = "DOWN";
-    if(dy < 0 && d !== "DOWN") d = "UP";
+    if(dy>0 && d!="UP") d="DOWN";
+    else if(dy<0 && d!="DOWN") d="UP";
   }
-}, { passive: false });
+},{passive:false});
 
-/* ===== COLLISION ===== */
-function collision(head, array){
-  return array.some(p => p.x === head.x && p.y === head.y);
-}
-
-/* ===== PARTICLES ===== */
-function createParticles(x,y){
-  for(let i = 0; i < 10; i++){
-    particles.push({
-      x: x + box / 2,
-      y: y + box / 2,
-      vx: (Math.random() - 0.5) * 4,
-      vy: (Math.random() - 0.5) * 4,
-      alpha: 1
-    });
-  }
-}
-
-function drawParticles(){
-  for(let i = particles.length - 1; i >= 0; i--){
-    let p = particles[i];
-    ctx.fillStyle = `rgba(255,255,0,${p.alpha})`;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-    ctx.fill();
-    p.x += p.vx;
-    p.y += p.vy;
-    p.alpha -= 0.05;
-    if(p.alpha <= 0) particles.splice(i,1);
-  }
-}
-
-/* ===== RAINBOW ===== */
-function updateRainbow(){
-  rainbowHue = (rainbowHue + 2) % 360;
-}
-function getRainbowColor(i){
-  return `hsl(${(rainbowHue + i * 10) % 360},100%,50%)`;
-}
-
-/* ===== DRAW ===== */
-function draw(){
-  if(paused) return;
-
-  // Fundo
-  for(let x = 0; x < canvas.width; x += box){
-    for(let y = 0; y < canvas.height; y += box){
-      ctx.fillStyle = ((x / box + y / box) % 2) ? "#2e8b2e" : "#267326";
-      ctx.fillRect(x, y, box, box);
-    }
-  }
-
-  // Obstáculos
-  if(mode === "hardcore"){
-    ctx.fillStyle = "brown";
-    obstacles.forEach(o => ctx.fillRect(o.x, o.y, box, box));
-  }
-
-  // Cobra
-  updateRainbow();
-  snake.forEach((s, i) => {
-    ctx.fillStyle = snakeColor === "rainbow" ? getRainbowColor(i) : snakeColor;
-    ctx.fillRect(s.x, s.y, box, box);
-  });
-
-  // Comida
-  ctx.fillStyle = "red";
-  ctx.fillRect(food.x, food.y, box, box);
-
+// PAUSA E RESTART
+@@ -264,13 +279,15 @@ <h1>🐍 Cobrinha Jogo</h1>
+  ctx.beginPath();
+  ctx.arc(fx,fy,box/2,0,Math.PI*2);
+  ctx.fill();
+  // folha
+  ctx.fillStyle="green";
+  ctx.beginPath();
+  ctx.moveTo(fx, fy - box/2);
+  ctx.lineTo(fx - box/6, fy - box*0.7);
+  ctx.lineTo(fx + box/6, fy - box*0.7);
+  ctx.closePath();
+  ctx.fill();
+  // cabinho
+  ctx.strokeStyle="#8B4513";
+  ctx.lineWidth=2;
+  ctx.beginPath();
+@@ -281,28 +298,12 @@ <h1>🐍 Cobrinha Jogo</h1>
   drawParticles();
 
-  // Movimento
-  let head = { ...snake[0] };
-  if(d === "LEFT") head.x -= box;
-  if(d === "RIGHT") head.x += box;
-  if(d === "UP") head.y -= box;
-  if(d === "DOWN") head.y += box;
+  // POSIÇÃO NOVA
+  let snakeX = snake[0].x;
+  let snakeY = snake[0].y;
 
-  if(mode === "infinito"){
-    head.x = (head.x + canvas.width) % canvas.width;
-    head.y = (head.y + canvas.height) % canvas.height;
+  // MOVIMENTO POR TOUCH
+  if(touchX!==null && touchY!==null){
+    let headX = snake[0].x + box/2;
+    let headY = snake[0].y + box/2;
+    let dx = touchX - headX;
+    let dy = touchY - headY;
+    let dist = Math.sqrt(dx*dx + dy*dy);
+    if(dist>1){
+      dx/=dist;
+      dy/=dist;
+      snakeX += dx*box;
+      snakeY += dy*box;
+    }
+  } else {
+    if(d=="LEFT") snakeX-=box;
+    if(d=="UP") snakeY-=box;
+    if(d=="RIGHT") snakeX+=box;
+    if(d=="DOWN") snakeY+=box;
+  }
+  let snakeX=snake[0].x;
+  let snakeY=snake[0].y;
+  if(d=="LEFT") snakeX-=box;
+  if(d=="UP") snakeY-=box;
+  if(d=="RIGHT") snakeX+=box;
+  if(d=="DOWN") snakeY+=box;
+
+  // MODO INFINITO
+  if(mode==="infinito"){
+@@ -313,19 +314,19 @@ <h1>🐍 Cobrinha Jogo</h1>
   }
 
-  if(head.x === food.x && head.y === food.y){
+  // COMER COMIDA
+  if(Math.floor(snakeX/box)*box==food.x && Math.floor(snakeY/box)*box==food.y){
+  if(snakeX==food.x && snakeY==food.y){
     score++;
-    createParticles(food.x, food.y);
+    createParticles(food.x,food.y);
     generateFood();
   } else {
     snake.pop();
   }
 
-  if(
-    (mode !== "infinito" &&
-     (head.x < 0 || head.y < 0 || head.x >= canvas.width || head.y >= canvas.height)) ||
-    collision(head, snake) ||
-    (mode === "hardcore" && collision(head, obstacles))
-  ){
-    return gameOver();
+  let newHead={x:Math.floor(snakeX/box)*box, y:Math.floor(snakeY/box)*box};
+  let newHead={x:snakeX,y:snakeY};
+
+  // COLISÕES
+  if(mode!=="infinito"){
+    if(newHead.x<0||newHead.y<0||newHead.x>=canvas.width||newHead.y>=canvas.height) return gameOver();
+    if(snakeX<0||snakeY<0||snakeX>=canvas.width||snakeY>=canvas.height) return gameOver();
   }
-
-  snake.unshift(head);
-  scoreDisplay.innerText = `${playerName} | ${mode} | Score: ${score}`;
-}
-
-/* ===== GAME OVER ===== */
-function gameOver(){
-  clearInterval(game);
-  alert(`💀 Game Over, ${playerName}! Pontuação: ${score}`);
-  menu.style.display = "block";
-}
-</script>
-
-</body>
-</html>
+  if(collision(newHead,snake)) return gameOver();
