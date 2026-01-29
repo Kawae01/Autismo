@@ -1,197 +1,187 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Cobrinha Jogo</title>
+<title>🐍 Cobrinha Bonita</title>
+
+<!-- Código do AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6184395720701313"
+     crossorigin="anonymous"></script>
+
 <style>
-body {
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  height: 100%;
-  touch-action: none;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: 'Courier New', monospace;
-  background: linear-gradient(to bottom, #1a3d1a, #0e220e);
-}
+  body {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(to bottom, #2c7a2c, #1e5f1e);
+    height: 100vh;
+    overflow: hidden;
+    font-family: 'Courier New', monospace;
+  }
 
-canvas {
-  border: 10px solid #0d260d;
-  background: #1e5f1e;
-  display: block;
-}
+  canvas {
+    border: 5px solid black;
+    background: #1e5f1e;
+    display: block;
+  }
 
-#menu {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #133913;
-  padding: 20px;
-  border-radius: 15px;
-  text-align: center;
-  z-index: 10;
-  color: white;
-}
+  #menu {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.7);
+    padding: 30px;
+    border-radius: 20px;
+    color: white;
+    text-align: center;
+    z-index: 2;
+  }
 
-#menu input, #menu select, #menu button {
-  margin: 8px 0;
-  padding: 10px;
-  font-size: 16px;
-  border-radius: 10px;
-  border: none;
-}
+  #menu input, #menu select, #menu button {
+    margin: 10px 0;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 10px;
+    border: none;
+  }
 
-#score {
-  position: absolute;
-  top: 10px;
-  left: 20px;
-  color: white;
-  font-size: 20px;
-}
+  #score {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px #000;
+    z-index: 2;
+  }
 </style>
 </head>
 <body>
 
 <div id="menu">
-  <h1>🐍 Cobrinha Jogo</h1>
-  <input type="text" id="playerName" placeholder="Digite seu nome"><br>
-
-  <label>Cor da Cobra:</label><br>
+  <h1>🐍 Jogo da Cobrinha</h1>
+  <input type="text" id="playerName" placeholder="Digite seu nome">
+  <br>
+  <label>Cor da Cobra: </label>
   <select id="snakeColor">
-    <option value="yellow">Amarelo</option>
-    <option value="cyan">Ciano</option>
-    <option value="lime">Verde Limão</option>
+    <option value="green">Verde</option>
+    <option value="blue">Azul</option>
+    <option value="purple">Roxo</option>
     <option value="orange">Laranja</option>
     <option value="pink">Rosa</option>
-  </select><br>
-
-  <label>Modo de Jogo:</label><br>
-  <select id="gameMode">
-    <option value="classico">Clássico</option>
-    <option value="infinito">Infinito</option>
-    <option value="hardcore">Hardcore</option>
-  </select><br>
-
+  </select>
+  <br>
   <button onclick="startGame()">Iniciar</button>
 </div>
 
 <div id="score"></div>
-<canvas id="gameCanvas"></canvas>
+<canvas id="game"></canvas>
 
 <script>
-const canvas = document.getElementById("gameCanvas");
+const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
-const box = 20;
+const scoreDisplay = document.getElementById("score");
+const menu = document.getElementById("menu");
 
-let snake, food, obstacles = [];
-let score = 0;
-let d = null;
-let game;
-let playerName, snakeColor, mode;
-let paused = false;
-
-// Ajusta canvas
-function resizeCanvas(){
+// Ajusta canvas para a tela
+function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 }
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
-// INÍCIO DO JOGO
-function startGame(){
-  document.getElementById("menu").style.display = "none";
+const box = 20;
+let snake = [];
+let food;
+let score = 0;
+let d;
+let game;
+let playerName;
+let snakeColor;
 
+function startGame() {
   playerName = document.getElementById("playerName").value || "Jogador";
-  snakeColor = document.getElementById("snakeColor").value;
-  mode = document.getElementById("gameMode").value;
+  snakeColor = document.getElementById("snakeColor").value || "green";
+  menu.style.display = "none";
 
-  snake = [{x: 10*box, y: 10*box}];
+  snake = [];
+  snake[0] = { x: 9*box, y: 10*box };
   score = 0;
-  d = "RIGHT";
-  obstacles = [];
+  d = null;
 
   generateFood();
-  if(mode==="hardcore") generateObstacles();
-
-  clearInterval(game);
-  game = setInterval(draw, mode==="hardcore"?80:100);
+  if(game) clearInterval(game);
+  game = setInterval(draw, 100);
 }
 
-// GERA COMIDA
-function generateFood(){
+// Gera comida em posição aleatória
+function generateFood() {
   food = {
-    x: Math.floor(Math.random()*(canvas.width/box))*box,
-    y: Math.floor(Math.random()*(canvas.height/box))*box
+    x: Math.floor(Math.random() * (canvas.width / box)) * box,
+    y: Math.floor(Math.random() * (canvas.height / box)) * box
   };
 }
 
-// OBSTÁCULOS
-function generateObstacles(){
-  for(let i=0;i<10;i++){
-    obstacles.push({
-      x: Math.floor(Math.random()*(canvas.width/box))*box,
-      y: Math.floor(Math.random()*(canvas.height/box))*box
-    });
-  }
-}
-
-// TECLADO
-document.addEventListener("keydown", e=>{
-  if(e.key=="ArrowLeft" && d!="RIGHT") d="LEFT";
-  else if(e.key=="ArrowUp" && d!="DOWN") d="UP";
-  else if(e.key=="ArrowRight" && d!="LEFT") d="RIGHT";
-  else if(e.key=="ArrowDown" && d!="UP") d="DOWN";
-  else if(e.key=="p") paused=!paused;
-  else if(e.key=="r") restartGame();
+// Controles teclado
+document.addEventListener("keydown", function(event){
+  if (event.keyCode == 37 && d != "RIGHT") d = "LEFT";
+  else if (event.keyCode == 38 && d != "DOWN") d = "UP";
+  else if (event.keyCode == 39 && d != "LEFT") d = "RIGHT";
+  else if (event.keyCode == 40 && d != "UP") d = "DOWN";
 });
 
-// SWIPE
+// Controles swipe para celular
 let startX, startY;
-canvas.addEventListener("touchstart", e=>{
-  startX=e.touches[0].clientX;
-  startY=e.touches[0].clientY;
-},{passive:true});
-
-canvas.addEventListener("touchend", e=>{
+document.addEventListener("touchstart", e => {
+  startX = e.touches[0].clientX;
+  startY = e.touches[0].clientY;
+});
+document.addEventListener("touchend", e => {
   let dx = e.changedTouches[0].clientX - startX;
   let dy = e.changedTouches[0].clientY - startY;
-  if(Math.abs(dx)>Math.abs(dy)){
+  if(Math.abs(dx) > Math.abs(dy)){
     if(dx>0 && d!="LEFT") d="RIGHT";
     else if(dx<0 && d!="RIGHT") d="LEFT";
   } else {
     if(dy>0 && d!="UP") d="DOWN";
     else if(dy<0 && d!="DOWN") d="UP";
   }
-},{passive:true});
+});
 
-// DESENHO DO JOGO
+// Função de colisão
+function collision(head,array){
+  for(let i=0;i<array.length;i++){
+    if(head.x==array[i].x && head.y==array[i].y) return true;
+  }
+  return false;
+}
+
+// Função principal de desenho
 function draw(){
-  if(paused) return;
-
-  ctx.fillStyle="#1e5f1e";
+  // Fundo
+  ctx.fillStyle="#228B22";
   ctx.fillRect(0,0,canvas.width,canvas.height);
 
   // Cobra
   for(let i=0;i<snake.length;i++){
-    ctx.fillStyle = i==0 ? "white" : snakeColor;
-    ctx.fillRect(snake[i].x, snake[i].y, box, box);
+    ctx.fillStyle = (i==0)? snakeColor : "#a5f0a5";
+    ctx.beginPath();
+    ctx.arc(snake[i].x + box/2, snake[i].y + box/2, box/2, 0, Math.PI*2);
+    ctx.fill();
   }
 
-  // Comida (maçã)
+  // Comida
   ctx.fillStyle="red";
   ctx.beginPath();
   ctx.arc(food.x+box/2, food.y+box/2, box/2, 0, Math.PI*2);
   ctx.fill();
 
-  // Obstáculos
-  ctx.fillStyle="gray";
-  obstacles.forEach(o=>ctx.fillRect(o.x,o.y,box,box));
-
-  // Movimento
+  // Posição nova da cabeça
   let snakeX = snake[0].x;
   let snakeY = snake[0].y;
 
@@ -200,55 +190,27 @@ function draw(){
   if(d=="RIGHT") snakeX += box;
   if(d=="DOWN") snakeY += box;
 
-  // Modo infinito
-  if(mode==="infinito"){
-    if(snakeX < 0) snakeX = canvas.width - box;
-    if(snakeY < 0) snakeY = canvas.height - box;
-    if(snakeX >= canvas.width) snakeX = 0;
-    if(snakeY >= canvas.height) snakeY = 0;
-  }
-
-  // Come comida
-  if(snakeX === food.x && snakeY === food.y){
+  // Comeu comida
+  if(snakeX == food.x && snakeY == food.y){
     score++;
     generateFood();
   } else {
     snake.pop();
   }
 
-  let newHead = {x: snakeX, y: snakeY};
+  let newHead = {x:snakeX, y:snakeY};
 
-  // Colisões parede
-  if(mode!=="infinito"){
-    if(snakeX<0||snakeY<0||snakeX>=canvas.width||snakeY>=canvas.height) return gameOver();
-  }
-
-  // Colisão corpo
-  if(collision(newHead,snake)) return gameOver();
-
-  // Colisão obstáculos
-  for(let o of obstacles){
-    if(newHead.x===o.x && newHead.y===o.y) return gameOver();
+  // Colisão
+  if(snakeX < 0 || snakeY < 0 || snakeX >= canvas.width || snakeY >= canvas.height || collision(newHead,snake)){
+    clearInterval(game);
+    alert(`💀 Game Over, ${playerName}! Pontuação: ${score}`);
+    menu.style.display="block";
   }
 
   snake.unshift(newHead);
 
-  document.getElementById("score").innerText = playerName + " | Pontos: " + score;
-}
-
-function collision(head,array){
-  return array.some(segment=>segment.x===head.x && segment.y===head.y);
-}
-
-function gameOver(){
-  clearInterval(game);
-  alert("💀 Game Over, "+playerName+"! Pontos: "+score);
-  document.getElementByById("menu").style.display="block";
-}
-
-function restartGame(){
-  clearInterval(game);
-  startGame();
+  // Placar
+  scoreDisplay.innerText = `${playerName} | Score: ${score}`;
 }
 </script>
 </body>
